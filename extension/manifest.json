@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Xol Eyes UI Bridge",
+  "version": "1.0.0",
+  "description": "Bridges Chrome pages (including Claude in Chrome tabs) to the Xol Eyes UI desktop app.",
+  "permissions": ["tabs", "tabGroups", "scripting", "alarms"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Xol Eyes UI - open the desktop app to connect"
+  }
+}
