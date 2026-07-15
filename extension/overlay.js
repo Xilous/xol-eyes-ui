@@ -251,13 +251,19 @@
     const m = s.match(/(?:^|\/)((?:src|app|components|pages|modules)\/.*)$/);
     return m ? m[1] : s.split("/").slice(-3).join("/");
   }
+  // framework/wrapper component names that don't help locate user source
+  const NOISE = /^(Styled\(|ForwardRef\b|Memo\(|Box\d*$|Fragment$|Anonymous$|_c\d)/;
+  function usefulName(n) {
+    // real user components are capitalized and >2 chars; skip minified (s, l) and wrappers
+    return !!n && n !== "Unknown" && n.length > 2 && !/^[a-z]/.test(n) && !NOISE.test(n);
+  }
   function reactInfo(el) {
     try {
       let f = fiberOf(el);
       const names = [];
       let source = null;
       let hops = 0;
-      while (f && hops < 80) {
+      while (f && hops < 120) {
         const t = f.type || f.elementType;
         let n = null;
         if (typeof t === "function") n = t.displayName || t.name;
@@ -269,8 +275,11 @@
         f = f.return;
         hops++;
       }
-      if (!names.length && !source) return null;
-      return { component: names[0] || null, breadcrumb: names.slice(0, 5).reverse(), source };
+      const useful = names.filter(usefulName);
+      const component = useful[0] || names[0] || null;
+      if (!component && !source) return null;
+      // breadcrumb reads root -> ...-> nearest; keep the nearest few useful names
+      return { component, breadcrumb: useful.slice(0, 5).reverse(), source };
     } catch {
       return null;
     }
